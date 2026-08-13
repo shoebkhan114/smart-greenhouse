@@ -199,12 +199,33 @@ function refreshCharts(){
 
 /* Badge helper */
 function setBadge(el, text, type){
+  if(!el){
+    console.error("Badge element not found");
+    return;
+  }
+
   el.textContent = text;
-  el.classList.remove('green','yellow','red','neutral','online','offline');
-  if(type === 'green') el.classList.add('green','status-pill','online');
-  else if(type === 'yellow') el.classList.add('yellow','status-pill');
-  else if(type === 'red') el.classList.add('red','status-pill','offline');
-  else el.classList.add('neutral','status-pill');
+
+  el.classList.remove(
+    'green',
+    'yellow',
+    'red',
+    'neutral',
+    'online',
+    'offline'
+  );
+
+  if(type === 'green')
+    el.classList.add('green','status-pill','online');
+
+  else if(type === 'yellow')
+    el.classList.add('yellow','status-pill');
+
+  else if(type === 'red')
+    el.classList.add('red','status-pill','offline');
+
+  else
+    el.classList.add('neutral','status-pill');
 }
 
 /* Alerts (same priority rules as before) */
