@@ -146,7 +146,10 @@ class Command(BaseModel):
     mode: Optional[str] = None
     fan: Optional[str] = None
     pump: Optional[str] = None
-
+class ControlState(BaseModel):
+    mode: Optional[str] = None
+    fan: Optional[bool] = None
+    pump: Optional[bool] = None
 
 # ============================================================
 # LATEST COMMAND
@@ -157,7 +160,15 @@ latest_command = {
     "fan": "OFF",
     "pump": "OFF"
 }
+# ============================================================
+# CONTROL STATE
+# ============================================================
 
+control_state = {
+    "mode": "AUTO",
+    "fan": False,
+    "pump": False
+}
 
 # ============================================================
 # SET COMMAND
@@ -241,3 +252,50 @@ def set_command(command: Command):
 def get_commands():
 
     return latest_command
+# ============================================================
+# GET CONTROL STATE
+# ============================================================
+
+@app.get("/api/control")
+def get_control():
+
+    return {
+        "success": True,
+        "data": control_state
+    }
+# ============================================================
+# UPDATE CONTROL STATE
+# ============================================================
+
+@app.post("/api/control")
+def update_control(data: ControlState):
+
+    global control_state
+
+    if data.mode is not None:
+
+        mode = data.mode.upper()
+
+        if mode not in ["AUTO", "MANUAL"]:
+            return {
+                "success": False,
+                "message": "Mode must be AUTO or MANUAL"
+            }
+
+        control_state["mode"] = mode
+
+    if data.fan is not None:
+        control_state["fan"] = data.fan
+
+    if data.pump is not None:
+        control_state["pump"] = data.pump
+
+    print("\n========== CONTROL UPDATE ==========")
+    print(control_state)
+    print("====================================\n")
+
+    return {
+        "success": True,
+        "message": "Control updated",
+        "data": control_state
+    }
