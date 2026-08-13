@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 
@@ -7,6 +8,13 @@ app = FastAPI(
     title="Smart Greenhouse API",
     description="IoT Based Automatic Temperature and Water Controlling System",
     version="1.0.0"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # Development ke liye
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

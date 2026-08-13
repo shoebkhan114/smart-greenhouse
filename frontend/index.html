@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IoT Based Automatic Temperature and Water Controlling System — Smart Greenhouse Automation System</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Favicons (simple) -->
+  <meta name="theme-color" content="#0f1724">
+</head>
+<body>
+  <div class="app">
+    <header class="header glass">
+      <div class="header-left">
+        <h1 class="project-title">IoT Based Automatic Temperature & Water Controlling System</h1>
+        <p class="project-sub">Smart Greenhouse Automation System</p>
+      </div>
+      <div class="header-right">
+        <div id="liveDateTime" class="live-datetime">Loading date & time...</div>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <!-- Top status cards -->
+      <section class="cards">
+        <div class="card glass">
+          <div class="card-icon temperature">
+            <!-- Thermometer SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 14.76V6a2 2 0 10-4 0v8.76A4 4 0 1014 14.76z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Temperature</div>
+            <div id="temperatureValue" class="card-value">-- °C</div>
+            <div id="temperatureSub" class="card-sub">Last update: --</div>
+          </div>
+        </div>
+
+        <div class="card glass">
+          <div class="card-icon humidity">
+            <!-- Droplet SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2s6 5 6 10a6 6 0 11-12 0c0-5 6-10 6-10z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Humidity</div>
+            <div id="humidityValue" class="card-value">-- %</div>
+            <div id="humiditySub" class="card-sub">Last update: --</div>
+          </div>
+        </div>
+
+        <div class="card glass">
+          <div class="card-icon soil">
+            <!-- Plant / soil SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v7m0 0l-3-3m3 3 3-3M4 20h16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Soil Moisture</div>
+            <div id="soilValue" class="card-value">-- %</div>
+            <div id="soilSub" class="card-sub">Last update: --</div>
+          </div>
+        </div>
+
+        <div class="card glass">
+          <div class="card-icon water">
+            <!-- Water tank SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7c0 5 4 9 8 9s8-4 8-9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Water Level</div>
+            <div id="waterValue" class="card-value">-- %</div>
+            <div id="waterSub" class="card-sub">Last update: --</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- System status + Control panel + Alerts -->
+      <section class="right-column">
+        <div class="panel glass system-status">
+          <h2>System Status</h2>
+          <div class="status-grid">
+            <div class="status-row"><span class="label">Mode</span><span id="modeBadge" class="badge neutral">--</span></div>
+            <div class="status-row"><span class="label">Fan</span><span id="fanBadge" class="badge neutral">--</span></div>
+            <div class="status-row"><span class="label">Pump</span><span id="pumpBadge" class="badge neutral">--</span></div>
+            <div class="status-row"><span class="label">Buzzer</span><span id="buzzerBadge" class="badge neutral">--</span></div>
+            <div class="status-row"><span class="label">Water Tank</span><span id="waterTankBadge" class="badge neutral">--</span></div>
+            <div class="status-row"><span class="label">System</span><span id="systemBadge" class="badge neutral">--</span></div>
+            <div class="status-row"><span class="label">ESP32 WiFi</span><span id="wifiBadge" class="badge neutral">DATA NOT AVAILABLE</span></div>
+            <div class="status-row"><span class="label">Backend API</span><span id="lastApiStatus" class="badge neutral">UNKNOWN</span></div>
+          </div>
+
+          <div class="last-update">
+            <div>Last telemetry update: <span id="lastUpdate">--:--:--</span></div>
+            <div class="next-update">Next update in approximately <span id="nextUpdate">5</span> seconds</div>
+          </div>
+        </div>
+
+        <div class="panel glass control-panel">
+          <h2>Control Panel</h2>
+
+          <div class="controls-row">
+            <div class="control-group">
+              <div class="control-title">Mode Control</div>
+              <div class="btn-row">
+                <button id="btnAuto" class="btn primary">AUTO</button>
+                <button id="btnManual" class="btn outline">MANUAL</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-title">Fan Control</div>
+              <div class="btn-row">
+                <button id="btnFanOn" class="btn success">Fan ON</button>
+                <button id="btnFanOff" class="btn danger">Fan OFF</button>
+              </div>
+              <div class="control-hint">Fan controls disabled in AUTO mode</div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-title">Pump Control</div>
+              <div class="btn-row">
+                <button id="btnPumpOn" class="btn success">Pump ON</button>
+                <button id="btnPumpOff" class="btn danger">Pump OFF</button>
+              </div>
+              <div class="control-hint">Pump controls disabled in AUTO mode — pump is blocked when water &lt; Minimum Safe Level</div>
+            </div>
+          </div>
+          <div id="controlNotice" class="control-notice">Controls ready</div>
+        </div>
+
+        <div class="panel glass thresholds-panel">
+          <h2>Control Thresholds</h2>
+          <ul class="threshold-list">
+            <li>Temperature: Fan ON ≥ <strong>30°C</strong> — Fan OFF ≤ <strong>27°C</strong></li>
+            <li>Soil Moisture: Pump ON &lt; <strong>30%</strong> — Pump OFF ≥ <strong>60%</strong></li>
+            <li>Water Level: Minimum Safe Level: <strong>30%</strong></li>
+          </ul>
+        </div>
+
+        <div class="panel glass alerts-panel">
+          <h2>Alerts</h2>
+          <div id="alertsList" class="alerts-list">
+            <div class="alert neutral">No data loaded yet.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts row -->
+      <section class="charts">
+        <div class="chart-card glass">
+          <h3>Temperature History (°C)</h3>
+          <canvas id="chartTemp"></canvas>
+        </div>
+
+        <div class="chart-card glass">
+          <h3>Humidity History (%)</h3>
+          <canvas id="chartHumidity"></canvas>
+        </div>
+
+        <div class="chart-card glass">
+          <h3>Soil Moisture History (%)</h3>
+          <canvas id="chartSoil"></canvas>
+        </div>
+
+        <div class="chart-card glass">
+          <h3>Water Level History (%)</h3>
+          <canvas id="chartWater"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>© <span id="year"></span> Smart Greenhouse — Built with HTML/CSS/JS</div>
+      <div class="api-status" aria-live="polite">
+        <span id="apiHealthText">Backend API:</span>&nbsp;<strong id="apiHealth" class="api-pill">UNKNOWN</strong>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Script -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
